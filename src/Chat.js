@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import firebase from 'firebase'
 import config from './fb-config'
+import './Chat.css'
 
 if (!firebase.apps.length)
     firebase.initializeApp(config)
@@ -9,7 +10,6 @@ class Chat extends Component {
     constructor () {
         super()
         this.sendData = this.sendData.bind(this)
-        this.state = { name: 'pepe' }
         this.db = firebase.database().ref()
     }
 
@@ -17,15 +17,26 @@ class Chat extends Component {
         let username = document.getElementById('username')
         let text = document.getElementById('text')
         
-        this.db.set(`${username.value} says: ${text.value}`)
+        this.db.push({username:`${username.value}`, text:`${text.value}`})
+        text.value = ""
     }
 
     componentDidMount () {
-        const nameRef = this.db.child('object').child('name')
-        nameRef.on('value', snapshot => {
-            this.setState({
-                name: snapshot.val()
-            })
+        this.db.on('child_added', (snapshot) => {
+            var msg = snapshot.val()
+
+            var msgUsernameElement = document.createElement('b')
+            msgUsernameElement.textContent = msg.username
+
+            var msgTextElement = document.createElement('p')
+            msgTextElement.textContent = msg.text
+
+            var msgElement = document.createElement('div')
+            msgElement.className = 'msg'
+            msgElement.appendChild(msgUsernameElement)
+            msgElement.appendChild(msgTextElement)
+
+            document.getElementById('results').appendChild(msgElement)
         })
     }
 
@@ -41,7 +52,7 @@ class Chat extends Component {
                     <input type="text" id="text" placeholder="Message"/>
                 </div>
                 <button id="post" onClick={this.sendData}>Post</button>
-                <div id="results">{ this.state.name }</div>
+                <div id="results"></div>
             </div>
         )
     }
