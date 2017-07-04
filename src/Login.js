@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import firebase from 'firebase'
+import './Login.css'
 
 class Login extends Component {  
     constructor (props) {
@@ -23,6 +24,7 @@ class Login extends Component {
                 postButton.style.display = 'block'
                 messageInput.style.display = 'block'
                 loginButton.textContent = `Logged in as ${this.state.username}`
+                loginButton.style.backgroundColor = '#4aa94a'
 
                 this.props.setUserName(this.state.username)
             })
