@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import firebase from 'firebase'
 import config from './fb-config'
 import './Chat.css'
+import Login from './Login'
 
 if (!firebase.apps.length)
     firebase.initializeApp(config)
@@ -10,39 +11,23 @@ class Chat extends Component {
     constructor () {
         super()
         this.sendData = this.sendData.bind(this)
-        this.login = this.login.bind(this)
-
         this.db = firebase.database().ref()
-
-        this.username = null
-
-
-        this.provider = new firebase.auth.GoogleAuthProvider()
+        this.state = { username: null }
+        this.setUserName = this.setUserName.bind(this)
     }
 
     sendData () {
         let text = document.getElementById('text')
         
-        this.db.push({username:`${this.username}`, text:`${text.value}`})
+        this.db.push({username:`${this.state.username}`, text:`${text.value}`})
         text.value = ""
     }
 
-    login () {
-        firebase.auth().signInWithPopup(this.provider)
-            .then((result) => {
-                this.username = result.user.displayName
-                var loginButton =  document.getElementById('login')
-                var postButton =  document.getElementById('post')
-                var messageInput = document.getElementById('message')
-                postButton.style.display = 'block'
-                messageInput.style.display = 'block'
-                loginButton.textContent = `Logged in as ${this.username}`
-            })
-            .catch((err) => console.log(err.message) )
+    setUserName (username) {
+        this.setState({ username: username })
     }
 
     componentDidMount () {
-        var loginButton =  document.getElementById('login')
         var postButton =  document.getElementById('post')
         var messageInput = document.getElementById('message')
         postButton.style.display = 'none'
@@ -69,16 +54,14 @@ class Chat extends Component {
     render () {
         return (
             <div>
-                <div>
-                <button id="login" onClick={this.login}>Login with Google</button><br/>
+                <Login setUserName={this.setUserName} />
+                <div id="message">
+                    <label htmlFor="text">Message</label>
+                    <input type="text" id="text" placeholder="Message"/>
+                </div>
+                <button id="post" onClick={this.sendData}>Post</button>
+                <div id="results"></div>
             </div>
-            <div id="message">
-                <label htmlFor="text">Message</label>
-                <input type="text" id="text" placeholder="Message"/>
-            </div>
-            <button id="post" onClick={this.sendData}>Post</button>
-            <div id="results"></div>
-        </div>
         )
     }
 }
